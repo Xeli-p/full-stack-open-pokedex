@@ -30,7 +30,7 @@ jobs:
         - name: Setup Flyctl
           uses: superfly/flyctl-actions/setup-flyctl@master
     
-        - name: Deploy
+        - name: deploy
           run: flyctl deploy --remote-only
           env:
               FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -13,8 +13,12 @@ jobs:
       concurrency:
         group: deploy-group  # optional: ensure only one action runs at a time
       steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+  
         - name: Setup Flyctl
-          uses: superfly/flyctl-actions/setup-flyctl@master 
+          uses: superfly/flyctl-actions/setup-flyctl@master
+  
         - name: Deploy
           run: flyctl deploy --remote-only
           env:

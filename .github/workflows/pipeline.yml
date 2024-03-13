@@ -21,13 +21,9 @@ jobs:
           run: npm run build
         - name: test
           run: npm run test
-          
-    test_job:
-        runs-on: ubuntu-20.04
-        steps:
-          - name: e2e tests
-            uses: cypress-io/github-action@v5
-            with:
-              command: npm run test:e2e
-              start: npm run start-prod
-              wait-on: http://localhost:5000
+        - name: e2e tests
+          uses: cypress-io/github-action@v5
+          with:
+            command: npm run test:e2e
+            start: npm run start-prod
+            wait-on: http://localhost:5000

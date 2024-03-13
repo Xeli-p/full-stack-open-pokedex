@@ -14,10 +14,6 @@ const useApi = (url, mapResults = (result) => result) => {
       .finally(() => setIsLoading(false))
   }, [url])
 
-  app.get('/health', (_req, res) => {
-      res.send("ok")
-  })
-
   return { data, isLoading, error }
 }
 

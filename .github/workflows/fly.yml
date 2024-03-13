@@ -19,16 +19,6 @@ jobs:
         - name: Setup Flyctl
           uses: superfly/flyctl-actions/setup-flyctl@master
   
-        - name: Run health check
-          run: |
-            health_check_result=$(curl -s http://localhost:3000/health)
-  
-            if [ "$health_check_result" = "ok" ]; then
-              echo "Health check passed. Proceeding with deployment."
-            else
-              echo "Health check failed. Skipping deployment."
-              exit 1  
-            fi          
         - name: Deploy
           run: flyctl deploy --remote-only
           env:

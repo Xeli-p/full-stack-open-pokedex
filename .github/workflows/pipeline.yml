@@ -1,36 +1,37 @@
-name: Lint and deploy pipeline
+name: Lint, Build, and Test
 
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
-    lint_job:
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/setup-node@v4
-          with:
-            node-version: '20'
-        - name: Install dependencies 
-          run: npm install  
-        - name: Check style
-          run: npm run eslint
-        - name: build
-          run: npm run build
-        - name: test
-          run: npm run test
-        - name: e2e tests
-          uses: cypress-io/github-action@v5
-          with:
-            command: npm run test:e2e
-            start: npm run start-prod
-            wait-on: http://localhost:5000
-        - name: Setup Flyctl
-          uses: superfly/flyctl-actions/setup-flyctl@master
-    
-        - name: deploy
-          run: flyctl deploy --remote-only
-          env:
-              FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+  lint_build_test_job:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies 
+        run: npm install  
+
+      - name: Check style
+        run: npm run eslint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test
+
+      - name: Run end-to-end tests
+        uses: cypress-io/github-action@v5
+        with:
+          command: npm run test:e2e
+          start: npm run start-prod
+          wait-on: http://localhost:5000

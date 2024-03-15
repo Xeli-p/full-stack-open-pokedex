@@ -39,8 +39,8 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-20.04
     steps:
-      - name: Build
-        run: npm run build
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master

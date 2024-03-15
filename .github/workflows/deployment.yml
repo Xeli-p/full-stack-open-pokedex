@@ -1,13 +1,11 @@
 name: Deployment pipeline
 
 on:
-  push:
-    branches:
-      - main
   workflow_run:
     workflows: ["Lint, Build, and Test"]
     types:
       - completed
+    branches: [main]
 
 jobs:
   deploy_job:

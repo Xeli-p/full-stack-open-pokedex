@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
 
+    
 jobs:
   lint_build_test_job:
     runs-on: ubuntu-20.04

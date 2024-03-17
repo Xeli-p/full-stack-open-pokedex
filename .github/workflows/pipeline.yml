@@ -73,6 +73,28 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
 
+      - name: Notify discord about success
+        if: ${{ success() }}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: info
+          username: GitHub
+          text: New build succesfully deployed
+          description: to https://fs-pokedex-xp.fly.dev by ${{ github.actor }}
+          footer: 'Severity: Informational'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+      
+      - name: Notify discord about failure
+        if: ${{ failure() }}
+        uses: rjstone/discord-webhook-notify@v1
+        with:
+          severity: error
+          username: GitHub
+          text: Build failed
+          description: commit https://github.com/${{ github.repository }}/commit/${{ github.sha }} by ${{ github.actor }} broke the build :(
+          footer: 'Severity: Error'
+          webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+
   tag_release:
     needs: deploy_job
     runs-on: ubuntu-20.04

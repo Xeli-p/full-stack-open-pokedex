@@ -35,22 +35,27 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
           
-  deploy_job:
-    needs: lint_build_test_job
+  check_skip:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Check commit messages for #skip
+        id: check_skip
+        run: |
+          skip=false
+          for message in "${{ github.event.commits.*.message }}"; do
+            if [[ "$message" == *"#skip"* ]]; then
+              skip=true
+              break
+            fi
+          done
+          echo "::set-output name=skip::$skip"
 
-      - name: Check messages for skip
-        env:
-          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
-        run: echo "$COMMIT_MESSAGES"
-
-      - name: Check messages for skip2
-        env:
-          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
-        run: echo "$COMMIT_MESSAGES"
-
+  deploy_job:
+    needs: [lint_build_test_job, check_skip]
+    runs-on: ubuntu-20.04
+    if: ${{ !needs.check_skip.outputs.skip }}
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -65,19 +70,12 @@ jobs:
 
   tag_release:
     needs: deploy_job
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check messages for skip
-        env:
-          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
-        run: echo "$COMMIT_MESSAGES"
-
       - name: Bump version and push tag
-        if: ${{ ! contains(env.COMMIT_MESSAGES, '#skip') }}
         uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

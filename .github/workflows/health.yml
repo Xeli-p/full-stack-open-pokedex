@@ -1,6 +1,9 @@
 name: Health check
 
 on:
+  pull_request:
+      branches: [main]
+      types: [opened, synchronize]
   schedule:
     - cron: '*/5 * * * *'
 

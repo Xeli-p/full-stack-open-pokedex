@@ -76,6 +76,7 @@ jobs:
   tag_release:
     needs: deploy_job
     runs-on: ubuntu-20.04
+    if: ${{ needs.deploy_job.result != 'skipped' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

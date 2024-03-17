@@ -35,27 +35,32 @@ jobs:
           start: npm run start-prod
           wait-on: http://localhost:5000
           
-  check_skip:
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check commit messages for #skip
-        id: check_skip
-        run: |
-          skip=false
-          for message in "${{ github.event.commits.*.message }}"; do
-            if [[ "$message" == *"#skip"* ]]; then
-              skip=true
-              break
-            fi
-          done
-          echo "::set-output name=skip::$skip"
 
   deploy_job:
-    needs: [lint_build_test_job, check_skip]
+    needs: [lint_build_test_job]
     runs-on: ubuntu-20.04
-    if: ${{ !needs.check_skip.outputs.skip }}
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
+
+      - name: Check commit messages for skip
+        uses: actions/github-script@v6.3.1
+        id: check_skip
+        env:
+          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
+        with: 
+          result-encoding: string
+          script: |
+            var found = "false";
+            const commitMessages = JSON.parse(process.env.COMMIT_MESSAGES);
+            var messages = "";
+            for (const msg of commitMessages) {
+              messages += msg
+            }
+            if (messages.includes('#skip')) {
+              found = "true"
+            }
+            return found;
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -63,7 +68,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
-        if: ${{ ! contains(env.COMMIT_MESSAGES, '#skip') }}
+        if: ${{ steps.check_skip.outputs.result == 'true' }}
         run: flyctl deploy --remote-only -a fs-pokedex-xp
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

@@ -76,12 +76,31 @@ jobs:
   tag_release:
     needs: deploy_job
     runs-on: ubuntu-20.04
-    if: ${{ needs.deploy_job.result != 'skipped' }}
     steps:
+      - name: Check commit messages for skip
+        uses: actions/github-script@v6.3.1
+        id: check_skip
+        env:
+          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
+        with: 
+          result-encoding: string
+          script: |
+            var found = "false";
+            const commitMessages = JSON.parse(process.env.COMMIT_MESSAGES);
+            var messages = "";
+            for (const msg of commitMessages) {
+              messages += msg
+            }
+            if (messages.includes('#skip')) {
+              found = "true"
+            }
+            return found;
+            
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Bump version and push tag
+        if: ${{ steps.check_skip.outputs.result == 'false' }}
         uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

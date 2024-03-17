@@ -46,6 +46,11 @@ jobs:
           COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
         run: echo "$COMMIT_MESSAGES"
 
+      - name: Check messages for skip2
+        env:
+          COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
+        run: echo "$COMMIT_MESSAGES"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -53,7 +58,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Deploy
-        if: contains(env.COMMIT_MESSAGES, '#skip') == false
+        if: ${{ ! contains(env.COMMIT_MESSAGES, '#skip') }}
         run: flyctl deploy --remote-only -a fs-pokedex-xp
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
@@ -72,7 +77,7 @@ jobs:
         run: echo "$COMMIT_MESSAGES"
 
       - name: Bump version and push tag
-        if: contains(env.COMMIT_MESSAGES, '#skip') == false
+        if: ${{ ! contains(env.COMMIT_MESSAGES, '#skip') }}
         uses: anothrNick/github-tag-action@1.67.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

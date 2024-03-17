@@ -95,8 +95,9 @@ jobs:
               found = "true"
             }
             return found;
-            
+
       - name: Checkout code
+        if: ${{ steps.check_skip.outputs.result == 'false' }}
         uses: actions/checkout@v4
 
       - name: Bump version and push tag
